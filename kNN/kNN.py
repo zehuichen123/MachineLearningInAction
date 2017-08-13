@@ -4,6 +4,7 @@ from numpy import *
 import matplotlib
 import matplotlib.pyplot as plt
 import operator
+from os import listdir
 def createDataSet():
 	group=array([[1.0,1.1],[1.0,1.0],[0.0,0.0],[0.0,0.1]])
 	labels=['A','A','B','B']
@@ -64,4 +65,39 @@ def datingClassTest():
 		if classifierResult!=datingLabels[i]:
 			errorRate+=1.0
 	print('total error rate is %f'%(errorRate/float(NumTestVecs)))
-datingClassTest()
+
+def img2vector(filename):
+	returnVector=zeros((1,1024))
+	fr=open(filename)
+	for i in range(32):
+		lineStr=fr.readline()
+		for j in range(32):
+			returnVector[0,i*32+j]=int(lineStr[j])
+	return returnVector
+
+def handWritingClassTest():
+	hwLabels=[]
+	trainingFileList=listdir('trainingDigits')
+	m=len(trainingFileList)
+	trainingMat=zeros((m,1024))
+	for i in range(m):
+		fileNameStr=trainingFileList[i]
+		fileStr=fileNameStr.split('.')[0]
+		classNum=int(fileStr.split('_')[0])
+		hwLabels.append(classNum)
+		trainingMat[i,:]=img2vector('trainingDigits/%s'%fileNameStr)
+	testFileList=listdir('testDigits')
+	mTest=len(testFileList)
+	errorRate=0.0
+	for i in range(mTest):
+		fileNameStr=testFileList[i]
+		fileStr=fileNameStr.split('.')[0]
+		classNum=int(fileStr.split('_')[0])
+		vectorUnderTest=img2vector('testDigits/%s'%fileNameStr)
+		classifierResult=classify0(vectorUnderTest,trainingMat,hwLabels,3)
+		if classifierResult!=classNum:
+			errorRate+=1.0
+	print('total error rate is %f'%(errorRate/float(mTest)))
+
+handWritingClassTest()
+#datingClassTest()
